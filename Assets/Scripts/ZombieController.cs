@@ -4,6 +4,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class ZombieController : MonoBehaviour
 {
+    [SerializeField] private int maxHealth = 100;
     [SerializeField] private Transform targetPoint;
     [SerializeField] private Animator animator;
     [SerializeField] private float destinationUpdateInterval = 0.25f;
@@ -13,12 +14,14 @@ public class ZombieController : MonoBehaviour
     [SerializeField] private string attackTriggerParameter = "Attack";
 
     private NavMeshAgent agent;
+    private int currentHealth;
     private float nextDestinationUpdateTime;
     private float nextAttackTime;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        currentHealth = maxHealth;
 
         if (animator == null)
         {
@@ -63,6 +66,21 @@ public class ZombieController : MonoBehaviour
         UpdateDestination();
     }
 
+    public void TakeDamage(int damage)
+    {
+        if (damage <= 0)
+        {
+            return;
+        }
+
+        currentHealth -= damage;
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
     private void UpdateDestination()
     {
         nextDestinationUpdateTime = Time.time + destinationUpdateInterval;
@@ -98,5 +116,10 @@ public class ZombieController : MonoBehaviour
         }
 
         animator.SetFloat(speedParameter, speed);
+    }
+
+    private void Die()
+    {
+        Destroy(gameObject);
     }
 }
